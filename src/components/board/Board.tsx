@@ -1,25 +1,40 @@
+import { useState } from "react"
 import Column from "./Column"
-import type { Task } from "../../types/task"
+import type { Task, TaskStatus } from "../../types/task"
 
-const mockTasks: Task[] = [
+const initialTasks: Task[] = [
   { id: "1", title: "Criar layout inicial", status: "todo" },
   { id: "2", title: "Configurar Tailwind", status: "doing" },
   { id: "3", title: "Estruturar projeto", status: "review" },
   { id: "4", title: "Projeto base pronto", status: "done" },
 ]
 
+const columns: TaskStatus[] = ["todo", "doing", "review", "done"]
+
 export default function Board() {
-  const todo = mockTasks.filter(t => t.status === "todo")
-  const doing = mockTasks.filter(t => t.status === "doing")
-  const review = mockTasks.filter(t => t.status === "review")
-  const done = mockTasks.filter(t => t.status === "done")
+  const [tasks, setTasks] = useState(initialTasks)
+
+  function handleMoveTask(taskId: string, newStatus: TaskStatus) {
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === taskId
+          ? { ...task, status: newStatus }
+          : task
+      )
+    )
+  }
 
   return (
     <div className="flex gap-4 overflow-x-auto">
-      <Column title="To Do" tasks={todo} />
-      <Column title="Doing" tasks={doing} />
-      <Column title="Review" tasks={review} />
-      <Column title="Done" tasks={done} />
+      {columns.map(column => (
+        <Column
+          key={column}
+          title={column.toUpperCase()}
+          status={column}
+          tasks={tasks.filter(t => t.status === column)}
+          onMoveTask={handleMoveTask}
+        />
+      ))}
     </div>
   )
 }
