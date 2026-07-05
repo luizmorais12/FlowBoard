@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Column from "./Column"
+import CreateTask from "./CreateTask"
 import type { Task, TaskStatus } from "../../types/task"
 
 import {
@@ -11,6 +12,8 @@ import {
 } from "@dnd-kit/core"
 import type { DragEndEvent } from "@dnd-kit/core"
 
+const STORAGE_KEY = "flowboard:tasks"
+
 const columns: TaskStatus[] = ["todo", "doing", "review", "done"]
 
 const initialTasks: Task[] = [
@@ -21,16 +24,23 @@ const initialTasks: Task[] = [
 ]
 
 export default function Board() {
-  const [tasks, setTasks] = useState(initialTasks)
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    return saved ? JSON.parse(saved) : initialTasks
+  })
+
+  // salvar sempre que mudar
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
+  }, [tasks])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
+      activationConstraint: { distance: 5 },
     })
   )
 
+  // mover task entre colunas
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
 
@@ -48,22 +58,33 @@ export default function Board() {
     )
   }
 
+  // criar nova task
+  function handleCreate(task: Task) {
+    setTasks(prev => [task, ...prev])
+  }
+
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex gap-4 overflow-x-auto">
-        {columns.map(column => (
-          <Column
-            key={column}
-            id={column}
-            title={column.toUpperCase()}
-            tasks={tasks.filter(t => t.status === column)}
-          />
-        ))}
-      </div>
-    </DndContext>
+    <div className="flex flex-col gap-4">
+      {/* CREATE TASK */}
+      <CreateTask onCreate={handleCreate} />
+
+      {/* BOARD */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex gap-4 overflow-x-auto">
+          {columns.map(column => (
+            <Column
+              key={column}
+              id={column}
+              title={column.toUpperCase()}
+              tasks={tasks.filter(t => t.status === column)}
+            />
+          ))}
+        </div>
+      </DndContext>
+    </div>
   )
 }
