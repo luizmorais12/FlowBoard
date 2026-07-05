@@ -1,11 +1,10 @@
 import AppLayout from "./layout/AppLayout"
+import Board from "./components/board/Board"
 
 export default function App() {
   return (
     <AppLayout>
-      <h1 className="text-2xl font-bold">
-        Welcome to FlowBoard 🚀
-      </h1>
+      <Board />
     </AppLayout>
   )
 }
