@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import Column from "./Column"
-import CreateTask from "./CreateTask"
-import type { Task, TaskStatus } from "../../types/task"
+import Column from "../components/board/Column"
+import CreateTask from "../components/board/CreateTask"
+import type { Task, TaskStatus } from "../types/task"
 
 import {
   DndContext,
