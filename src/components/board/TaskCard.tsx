@@ -1,15 +1,29 @@
 import type { Task } from "../../types/task"
+import { useDraggable } from "@dnd-kit/core"
+
 
 type Props = {
   task: Task
-  onMove: () => void
 }
 
-export default function TaskCard({ task, onMove }: Props) {
+export default function TaskCard({ task }: Props) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: task.id,
+  })
+
+  const style = transform
+    ? {
+        transform: `translate(${transform.x}px, ${transform.y}px)`,
+      }
+    : undefined
+
   return (
     <div
-      className="bg-zinc-800 p-3 rounded-lg border border-zinc-700 hover:border-zinc-500 transition cursor-pointer"
-      onClick={onMove}
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className="bg-zinc-800 p-3 rounded-lg border border-zinc-700 hover:border-zinc-500 transition cursor-grab active:cursor-grabbing"
     >
       <h3 className="text-sm font-semibold">{task.title}</h3>
     </div>
